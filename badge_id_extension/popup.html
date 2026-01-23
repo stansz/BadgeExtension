@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HID Card Calculator & Hex Converter</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>HID Card Calculator</h1>
+      <button id="popoutBtn" class="popout-btn" title="Open in separate window">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Mode Tabs -->
+    <div class="tabs">
+      <button id="tabHid" class="tab active" data-mode="hid">HID 35-bit</button>
+      <button id="tabHex" class="tab" data-mode="hex">Hex/Decimal</button>
+    </div>
+
+    <!-- HID 35-bit Mode -->
+    <div id="hidMode" class="mode-content active">
+      <div class="input-section">
+        <label for="hidHexInput">Hex Value:</label>
+        <input type="text" id="hidHexInput" placeholder="e.g., 123456789A" maxlength="9">
+        <button id="hidCalculateBtn" class="btn btn-primary">Calculate</button>
+        <button id="hidResetBtn" class="btn btn-secondary">Reset</button>
+      </div>
+
+      <div id="hidResults" class="results-section hidden">
+        <div class="result-item">
+          <span class="result-label">Bit Pattern:</span>
+          <span id="hidBitPattern" class="result-value">-</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Card Format:</span>
+          <span id="hidCardFormat" class="result-value">-</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Internal Card #:</span>
+          <span id="hidCardNumber" class="result-value">-</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Facility Code:</span>
+          <span id="hidFacilityCode" class="result-value">-</span>
+        </div>
+        <button id="hidCopyBtn" class="btn btn-copy">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy Results
+        </button>
+      </div>
+
+      <div id="hidError" class="error-message hidden"></div>
+    </div>
+
+    <!-- Hex/Decimal Converter Mode -->
+    <div id="hexMode" class="mode-content">
+      <div class="input-section">
+        <label for="hexDecInput">Input Value:</label>
+        <input type="text" id="hexDecInput" placeholder="Enter hex or decimal value">
+        
+        <div class="conversion-direction">
+          <label class="radio-label">
+            <input type="radio" name="conversionDirection" value="hexToDec" checked>
+            <span>Hex → Decimal</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="conversionDirection" value="decToHex">
+            <span>Decimal → Hex</span>
+          </label>
+        </div>
+
+        <button id="hexDecCalculateBtn" class="btn btn-primary">Convert</button>
+        <button id="hexDecResetBtn" class="btn btn-secondary">Reset</button>
+      </div>
+
+      <div id="hexDecResults" class="results-section hidden">
+        <div class="result-item">
+          <span class="result-label">Input:</span>
+          <span id="hexDecInputDisplay" class="result-value">-</span>
+        </div>
+        <div class="result-item">
+          <span class="result-label">Result:</span>
+          <span id="hexDecResult" class="result-value">-</span>
+        </div>
+        <button id="hexDecCopyBtn" class="btn btn-copy">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy Result
+        </button>
+      </div>
+
+      <div id="hexDecError" class="error-message hidden"></div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

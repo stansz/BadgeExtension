@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "HID Card Calculator & Hex Converter",
+  "version": "1.0.0",
+  "description": "Convert HID Corporate 1000 35-bit hex values to card format information, plus hex/decimal conversion tools",
+  "permissions": [
+    "contextMenus",
+    "clipboardWrite",
+    "notifications"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.svg",
+      "48": "icons/icon-48.svg",
+      "128": "icons/icon-128.svg"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon-16.svg",
+    "48": "icons/icon-48.svg",
+    "128": "icons/icon-128.svg"
+  },
+  "host_permissions": []
+}
