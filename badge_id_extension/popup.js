@@ -46,14 +46,42 @@ function switchMode(mode) {
 }
 
 // Popout functionality
+let popoutWindowId = null;
 popoutBtn.addEventListener('click', () => {
+  // Check if a popout window already exists
+  if (popoutWindowId !== null) {
+    chrome.windows.get(popoutWindowId, (existingWindow) => {
+      if (!chrome.runtime.lastError && existingWindow) {
+        // Focus existing window
+        chrome.windows.update(popoutWindowId, { focused: true });
+      } else {
+        // Window was closed, create a new one
+        createPopoutWindow();
+      }
+    });
+  } else {
+    createPopoutWindow();
+  }
+});
+
+function createPopoutWindow() {
   chrome.windows.create({
     url: 'popup.html',
     type: 'popup',
     width: 400,
     height: 600
+  }, (window) => {
+    if (window) {
+      popoutWindowId = window.id;
+      // Listen for window being closed
+      chrome.windows.onRemoved.addListener((closedWindowId) => {
+        if (closedWindowId === popoutWindowId) {
+          popoutWindowId = null;
+        }
+      });
+    }
   });
-});
+}
 
 // HID 35-bit Calculator
 hidCalculateBtn.addEventListener('click', calculateHid35);
@@ -230,34 +258,47 @@ function copyToClipboard(text) {
     });
   }).catch(err => {
     console.error('Failed to copy to clipboard:', err);
-    showError(hidError, 'Failed to copy to clipboard');
+    // Show error in the appropriate error div based on which mode is active
+    if (hidMode.classList.contains('active')) {
+      showError(hidError, 'Failed to copy to clipboard');
+    } else {
+      showError(hexDecError, 'Failed to copy to clipboard');
+    }
   });
 }
 
-// Handle messages from background script (for context menu)
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'calculateSelectedHex') {
-    const hexValue = request.hexValue;
-    if (hexValue) {
+// Handle context menu hex value from storage
+function checkContextMenuHex() {
+  chrome.storage.local.get(['contextMenuHex'], (result) => {
+    if (chrome.runtime.lastError) {
+      console.error('Error reading from storage:', chrome.runtime.lastError);
+      return;
+    }
+    if (result.contextMenuHex) {
+      console.log('Found context menu hex value:', result.contextMenuHex);
       // Switch to HID mode
       switchMode('hid');
       // Set the hex value
-      hidHexInput.value = hexValue;
+      hidHexInput.value = result.contextMenuHex;
       // Calculate
       calculateHid35();
       // Copy results to clipboard
       setTimeout(() => {
         copyHidResults();
       }, 100);
+      // Clear the stored value after using it
+      chrome.storage.local.remove(['contextMenuHex'], () => {
+        if (chrome.runtime.lastError) {
+          console.error('Error clearing storage:', chrome.runtime.lastError);
+        }
+      });
     }
-    sendResponse({ success: true });
-  }
-  return true;
-});
+  });
+}
 
-// Initialize: Check if there's a pre-populated value from context menu
+// Initialize: Check if there's a pre-populated value from context menu or URL
 document.addEventListener('DOMContentLoaded', () => {
-  // Check URL parameters for pre-populated values
+  // First check URL parameters for pre-populated values (for popout windows)
   const urlParams = new URLSearchParams(window.location.search);
   const prePopulatedHex = urlParams.get('hex');
   
@@ -265,5 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
     switchMode('hid');
     hidHexInput.value = prePopulatedHex;
     calculateHid35();
+  } else {
+    // If no URL parameter, check storage for context menu hex value
+    checkContextMenuHex();
   }
 });

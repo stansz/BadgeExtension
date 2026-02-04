@@ -16,24 +16,19 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     // Validate that the selection is a valid hex value
     const hexRegex = /^[0-9A-Fa-f]+$/;
     if (hexRegex.test(selectedText)) {
-      // Open the popup with the selected hex value
-      chrome.action.openPopup();
-      
-      // Send message to popup with the hex value
-      setTimeout(() => {
-        chrome.tabs.sendMessage(tab.id, {
-          action: 'calculateSelectedHex',
-          hexValue: selectedText
-        }).catch(() => {
-          // If popup is not ready, try opening with URL parameter
-          chrome.windows.create({
-            url: chrome.runtime.getURL('popup.html') + '?hex=' + encodeURIComponent(selectedText),
-            type: 'popup',
-            width: 400,
-            height: 600
-          });
+      // Store the hex value in storage for the popup to read
+      chrome.storage.local.set({ contextMenuHex: selectedText }).then(() => {
+        // Open the popup
+        chrome.action.openPopup();
+      }).catch(err => {
+        console.error('Failed to store hex value:', err);
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon-48.svg',
+          title: 'HID Card Calculator',
+          message: 'Failed to process selected hex value.'
         });
-      }, 100);
+      });
     } else {
       // Show error notification
       chrome.notifications.create({
